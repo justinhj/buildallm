@@ -55,28 +55,10 @@ def main():
 
     text = raw_text
 
-    # print(text)
-
-    result = re.split(r'([,.:;?_!"()\']|--|\s)', text)
-    result = [item for item in result if item.strip()]
-    print(result[:30])
-    print(len(result))
-
-    preprocessed = result
-
-    all_tokens = sorted(list(set(preprocessed)))
-    all_tokens.extend(["<|endoftext|>", "<|unk|>"])
-    vocab = {token: integer for integer, token in enumerate(all_tokens)}
-
-    print(len(vocab.items()))
-    for i, item in enumerate(list(vocab.items())[-5:]):
-        print(item)
-
     tokenizer = tiktoken.get_encoding("gpt2")
 
     text = (
-        "Hello, do you like tea? <|endoftext|> In the sunlit terraces"
-        "of someunknownPlace."
+        "Unknown or made up words will work. for example Akwirw ier"
     )
     integers = tokenizer.encode(text, allowed_special={"<|endoftext|>"})
     print(integers)
