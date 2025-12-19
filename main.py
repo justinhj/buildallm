@@ -1,4 +1,6 @@
 import re
+from importlib.metadata import version
+import tiktoken
 
 
 class SimpleTokenizerV1:
@@ -45,6 +47,8 @@ class SimpleTokenizerV2:
 
 
 def main():
+    print("tiktoken version:", version("tiktoken"))
+
     with open("./data/the-verdict.txt", "r", encoding="utf-8") as f:
         raw_text = f.read()
     print("Total number of characters:", len(raw_text))
@@ -68,13 +72,14 @@ def main():
     for i, item in enumerate(list(vocab.items())[-5:]):
         print(item)
 
-    tokenizer = SimpleTokenizerV2(vocab)
-    text = """"It's the last he heyes painted, you know,"
-           Mrs. Gisburn said with pardonable pride."""
-    ids = tokenizer.encode(text)
-    print(ids)
+    tokenizer = tiktoken.get_encoding("gpt2")
 
-    print(tokenizer.decode(ids))
+    text = (
+        "Hello, do you like tea? <|endoftext|> In the sunlit terraces"
+        "of someunknownPlace."
+    )
+    integers = tokenizer.encode(text, allowed_special={"<|endoftext|>"})
+    print(integers)
 
 
 if __name__ == "__main__":
