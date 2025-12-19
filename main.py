@@ -81,6 +81,9 @@ def main():
     integers = tokenizer.encode(text, allowed_special={"<|endoftext|>"})
     print(integers)
 
+    strings = tokenizer.decode(integers)
+    print(strings)
+
 
 if __name__ == "__main__":
     main()
