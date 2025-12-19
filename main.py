@@ -51,21 +51,20 @@ def main():
 
     with open("./data/the-verdict.txt", "r", encoding="utf-8") as f:
         raw_text = f.read()
-    print("Total number of characters:", len(raw_text))
 
-    text = raw_text
+    print("Total number of characters:", len(raw_text))
 
     tokenizer = tiktoken.get_encoding("gpt2")
 
-    text = (
-        "Unknown or made up words will work. for example Akwirw ier"
-    )
-    integers = tokenizer.encode(text, allowed_special={"<|endoftext|>"})
-    print(integers)
+    enc_text = tokenizer.encode(raw_text)
+    print(len(enc_text))
 
-    strings = tokenizer.decode(integers)
-    print(strings)
-
+    enc_sample = enc_text[50:]
+    context_size = 4
+    x = enc_sample[:context_size]
+    y = enc_sample[1:context_size+1]
+    print(f"x: {x}")
+    print(f"y:      {y}")
 
 if __name__ == "__main__":
     main()
