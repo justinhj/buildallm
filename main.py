@@ -3,6 +3,52 @@ from importlib.metadata import version
 import tiktoken
 import torch
 from torch.utils.data import Dataset, DataLoader
+import torch.nn as nn
+
+
+class DummyGPTModel(nn.Module):
+    def __init__(self, cfg):
+        super().__init__()
+        self.tok_emb = nn.Embedding(cfg["vocab_size"], cfg["emb_dim"])
+        self.pos_emb = nn.Embedding(cfg["context_length"], cfg["emb_dim"])
+        self.drop_emb = nn.Dropout(cfg["drop_rate"])
+        self.trf_blocks = nn.Sequential(
+            *[DummyTransformerBlock(cfg)
+              for _ in range(cfg["n_layers"])]
+        )
+        self.final_norm = DummyLayerNorm(cfg["emb_dim"])
+        self.out_head = nn.Linear(
+            cfg["emb_dim"], cfg["vocab_size"], bias=False
+        )
+
+    def forward(self, in_idx):
+        batch_size, seq_len = in_idx.shape
+        tok_embeds = self.tok_emb(in_idx)
+        pos_embeds = self.pos_emb(
+            torch.arange(seq_len, device=in_idx.device)
+        )
+        x = tok_embeds + pos_embeds
+        x = self.drop_emb(x)
+        x = self.trf_blocks(x)
+        x = self.final_norm(x)
+        logits = self.out_head(x)
+        return logits
+
+
+class DummyTransformerBlock(nn.Module):
+    def __init__(self, cfg):
+        super().__init__()
+
+    def forward(self, x):
+        return x
+
+
+class DummyLayerNorm(nn.Module):
+    def __init__(self, normalized_shape, eps=1e-5):
+        super().__init__()
+
+    def forward(self, x):
+        return x
 
 
 class GPTDatasetV1(Dataset):
@@ -90,34 +136,18 @@ def main():
     print(f'MPS available: {torch.backends.mps.is_available()}')
     print("tiktoken version:", version("tiktoken"))
 
-    with open("./data/the-verdict.txt", "r", encoding="utf-8") as f:
-        raw_text = f.read()
+    # with open("./data/the-verdict.txt", "r", encoding="utf-8") as f:
+    #     raw_text = f.read()
 
-    max_length = 4
-    dataloader = create_dataloader_v1(
-        raw_text, batch_size=8, max_length=max_length,
-        stride=max_length, shuffle=False
-    )
-    data_iter = iter(dataloader)
-    inputs, targets = next(data_iter)
-    print("Token IDs:\n", inputs)
-    print("\nInputs shape:\n", inputs.shape)
+    tokenizer = tiktoken.get_encoding("gpt2")
+    batch = []
+    txt1 = "Every effort moves you"
+    txt2 = "Every day holds a"
 
-    vocab_size = 50257
-    output_dim = 256
-    token_embedding_layer = torch.nn.Embedding(vocab_size, output_dim)
-
-    token_embeddings = token_embedding_layer(inputs)
-    print(token_embeddings.shape)
-
-    # absolute embeddings
-    context_length = max_length
-    pos_embedding_layer = torch.nn.Embedding(context_length, output_dim)
-    pos_embeddings = pos_embedding_layer(torch.arange(context_length))
-    print(pos_embeddings.shape)
-
-    input_embeddings = token_embeddings + pos_embeddings
-    print(input_embeddings.shape)
+    batch.append(torch.tensor(tokenizer.encode(txt1)))
+    batch.append(torch.tensor(tokenizer.encode(txt2)))
+    batch = torch.stack(batch, dim=0)
+    print(batch)
 
 
 if __name__ == "__main__":
