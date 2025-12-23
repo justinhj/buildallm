@@ -131,6 +131,17 @@ class SimpleTokenizerV2:
         return text
 
 
+GPT_CONFIG_124M = {
+    "vocab_size": 50257,     # Vocabulary size
+    "context_length": 1024,  # Context length
+    "emb_dim": 768,          # Embedding dimension
+    "n_heads": 12,           # Number of attention heads
+    "n_layers": 12,          # Number of layers
+    "drop_rate": 0.1,        # Dropout rate
+    "qkv_bias": False        # Query-Key-Value bias
+}
+
+
 def main():
     print(f'Torch loaded. version {torch.__version__}')
     print(f'MPS available: {torch.backends.mps.is_available()}')
@@ -148,6 +159,13 @@ def main():
     batch.append(torch.tensor(tokenizer.encode(txt2)))
     batch = torch.stack(batch, dim=0)
     print(batch)
+
+    # Run the model
+    torch.manual_seed(123)
+    model = DummyGPTModel(GPT_CONFIG_124M)
+    logits = model(batch)
+    print("Output shape:", logits.shape)
+    print(logits)
 
 
 if __name__ == "__main__":
