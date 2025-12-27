@@ -8,3 +8,14 @@ wheels/
 
 # Virtual environments
 .venv
+gpt2/
+*.csv
+
+# Steve Jobs junk
+.DS_Store
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# Saved weights
+*.pth
